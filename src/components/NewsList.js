@@ -2,6 +2,7 @@ import React, {useState, useEffect} from "react";
 import styled from 'styled-components'
 import NewsItem from "./NewsItem";
 import axios from 'axios'
+import usePromise from "../lib/usePromise";
 
 const NewsListBlock = styled.div`
     box-sizing: border-box;
@@ -17,9 +18,9 @@ const NewsListBlock = styled.div`
     `;
 
 const NewsList = ({category}) => {
-    const [articles, setArticles] = useState(null);
-    const [loading, setLoading] = useState(false);
-
+    const [loading, response, error] = usePromise(()=>{
+        const query = category === 'all' ? '' : `&category=%{category{`
+    })
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
@@ -41,9 +42,14 @@ const NewsList = ({category}) => {
         return <NewsListBlock>대기 중...</NewsListBlock>
     }
 
-    if(!articles) {
+    if(!response) {
         return null;
     }
+
+    if (error) {
+        return <NewsListBlock>에러발생</NewsListBlock>
+    }
+    const { articles }= response.data;
 
     return (
         <NewsListBlock>
